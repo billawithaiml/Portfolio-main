@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tutorials - Masum Billah</title>
+    <meta name="description" content="Tutorials on AI, machine learning and more." />
+    <meta name="theme-color" content="#191919" />
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/vendor.css" />
+    <script src="https://kit.fontawesome.com/43e5b1ec09.js" crossorigin="anonymous" defer></script>
+    <link rel="stylesheet" href="/css/aditya.css" />
+    <link rel="stylesheet" href="/css/custom.css" />
+    <link rel="stylesheet" href="/css/blog.css" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <style>
+      .vid-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 32px}
+      .vid-chip{background:transparent;color:inherit;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:6px 16px;cursor:pointer;font:inherit;font-size:14px}
+      .vid-chip.is-active,.vid-chip:hover{background:#fff;color:#111;border-color:#fff}
+      .vid-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}
+      .vid-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden;text-align:left}
+      .vid-media{position:relative;aspect-ratio:16/9;background:#000}
+      .vid-media iframe,.vid-media video{position:absolute;inset:0;width:100%;height:100%;border:0}
+      .vid-thumb{position:absolute;inset:0;width:100%;height:100%;border:0;padding:0;cursor:pointer;background:#000 center/cover no-repeat}
+      .vid-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+      .vid-thumb:hover .vid-play{transform:translate(-50%,-50%) scale(1.12)}
+      .vid-body{padding:16px}
+      .vid-tag{display:inline-block;font-size:12px;letter-spacing:.05em;text-transform:uppercase;opacity:.7;margin-bottom:6px}
+      .vid-title{font-size:18px;margin:0 0 6px;line-height:1.3}
+      .vid-desc{font-size:14px;opacity:.75;margin:0}
+    </style>
+  </head>
+
+  <body class="blog-page">
+    <nav class="navbar navbar-expand-lg fixed-top">
+      <div class="container">
+        <a class="navbar-brand mr-auto" href="/">Masum</a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarBlog"
+          aria-controls="navbarBlog"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <svg class="ham hamRotate ham1" viewBox="0 0 100 100" width="60">
+            <path
+              class="line top"
+              d="m 30,33 h 40 c 0,0 9.044436,-0.654587 9.044436,-8.508902 0,-7.854315 -8.024349,-11.958003 -14.89975,-10.85914 -6.875401,1.098863 -13.637059,4.171617 -13.637059,16.368042 v 40"
+            />
+            <path class="line middle" d="m 30,50 h 40" />
+            <path
+              class="line bottom"
+              d="m 30,67 h 40 c 12.796276,0 15.357889,-11.717785 15.357889,-26.851538 0,-15.133752 -4.786586,-27.274118 -16.667516,-27.274118 -11.88093,0 -18.499247,6.994427 -18.435284,17.125656 l 0.252538,40"
+            />
+          </svg>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarBlog">
+          <ul class="navbar-nav ml-auto">
+            <li><a class="nav-link" href="/">Home</a></li>
+            <li><a class="nav-link" href="/#services">Skills</a></li>
+            <li><a class="nav-link" href="/#resume">Experience</a></li>
+            <li><a class="nav-link" href="/#blog">Projects</a></li>
+            <li><a class="nav-link" href="/blog.html">Blogs</a></li>
+            <li><a class="nav-link active" href="/videos.html">Tutorials</a></li>
+            <li><a class="nav-link" href="/#testimony">Recommendations</a></li>
+            <li><a class="nav-link" href="/#contact">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="blog-hero text-center">
+      <div class="container">
+        <div class="section-head">
+          <span>Watch</span>
+          <h2>Tutorials</h2>
+        </div>
+        <p class="blog-hero__sub">
+          AI, Machine Learning and more - my tutorial videos and talks.
+        </p>
+      </div>
+    </div>
+
+    <div class="blog-grid-section">
+      <div class="container">
+        <div class="vid-chips" id="vid-chips"></div>
+        <div class="vid-grid" id="vid-grid"></div>
+        <p class="text-center" id="vid-empty" hidden>No videos on this topic yet.</p>
+      </div>
+    </div>
+
+    <footer class="blog-footer">
+      &copy; 2023-2026 <a href="/">Aditya Seth</a> &nbsp;&bull;&nbsp;
+      <a href="/feed.xml">RSS</a> &nbsp;&bull;&nbsp;
+      <a href="/humans_adi.txt">humans.txt</a>
+    </footer>
+    <script src="/js/vendor.js"></script>
+    <script src="/js/custom.js"></script>
+    <script src="/js/videos.js" defer></script>
+  </body>
+</html>

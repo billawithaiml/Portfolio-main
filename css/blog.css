@@ -1,0 +1,2477 @@
+/* ==========================================================================
+   blog.css - Blog section styles for adityaseth.in
+   Loaded after custom.css. Covers: listing (blog.html), post pages
+   (blog/<slug>.html), and tag archives (blog/tag/<tag>.html).
+
+   Extracted from blog.html's inline <style> block, then tokenized.
+   Cascade: bootstrap.min.css > vendor.css > aditya.css > custom.css > blog.css
+   ========================================================================== */
+
+/* aditya.css sets `body { overflow-x: hidden }` site-wide (kept for the
+   homepage, which has off-screen decorative elements that need it). Any
+   ancestor with a non-visible overflow on either axis - even just x - breaks
+   `position: sticky` for every descendant in most browsers, which is why the
+   post rail (TOC/tags/share) never actually stuck in place. Blog pages have
+   no off-screen elements, so it's safe to give them their own body class and
+   restore the default here. */
+body.blog-page {
+  overflow-x: visible;
+}
+
+/* Smooth-scrolls any in-page anchor jump - the TOC rail, footnote refs,
+   heading permalinks. Cancelled for prefers-reduced-motion by the blanket
+   `scroll-behavior: auto !important` reset further down this file. */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Design tokens ─────────────────────────────────────────── */
+:root {
+  /* Surfaces - elevation ladder */
+  --blog-bg: #191919;
+  --blog-surface-1: rgba(15, 15, 20, 0.6);
+  --blog-surface-2: rgba(25, 118, 210, 0.06);
+  --blog-surface-3: #111;
+
+  /* Accent ramp */
+  --blog-accent: #42a5f5;
+  --blog-accent-hi: #90caf9;
+  --blog-accent-deep: #2196f3;
+  --blog-accent-a07: rgba(66, 165, 245, 0.07);
+  --blog-accent-a10: rgba(66, 165, 245, 0.1);
+  --blog-accent-a32: rgba(66, 165, 245, 0.32);
+
+  /* Text ramp */
+  --blog-fg: #fff;
+  --blog-fg-2: #b8b8b8;
+  --blog-fg-3: #888;
+  --blog-fg-4: #555;
+  --blog-fg-5: #444;
+
+  /* Hairlines */
+  --blog-rule: rgba(255, 255, 255, 0.04);
+
+  /* Geometry */
+  --blog-radius: 16px;
+  --blog-radius-sm: 10px;
+  --blog-gap: 14px;
+  /* Fill the prose column edge to edge next to the rail, rather than
+     stopping at a fixed reading measure and leaving a gap. */
+  --blog-measure: 100%;
+
+  /* Motion - one curve, three durations */
+  --blog-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --blog-dur-fast: 0.18s;
+  --blog-dur: 0.3s;
+  --blog-dur-slow: 0.4s;
+  --blog-dur-slower: 0.45s;
+
+  /* Glass */
+  --blog-glass: blur(14px) saturate(1.3);
+  --blog-glass-sm: blur(8px) saturate(1.4);
+
+  /* Fonts */
+  --blog-mono: "JetBrains Mono", "SF Mono", ui-monospace, "Courier New",
+    monospace;
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+.blog-hero {
+  padding: 130px 0 64px;
+  background: var(--blog-bg);
+  border-bottom: 1px solid var(--blog-rule);
+}
+
+.blog-hero .section-head {
+  margin-bottom: 0;
+}
+
+.blog-hero__sub {
+  color: var(--blog-fg-3);
+  font-size: 0.95rem;
+  margin-top: 0.9rem;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.blog-hero__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--blog-accent);
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 1rem;
+  transition: color 0.2s;
+}
+
+.blog-hero__link:hover {
+  color: var(--blog-accent-hi);
+}
+
+/* ── Hero stats (total views, monthly readers) ───────────────── */
+.blog-hero__stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.blog-hero__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.83rem;
+  color: var(--blog-fg-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.blog-hero__stat i {
+  color: var(--blog-accent);
+  font-size: 0.82em;
+}
+.blog-hero__stat strong {
+  color: var(--blog-fg-2);
+  font-weight: 650;
+}
+.blog-hero__stat-dot {
+  color: var(--blog-fg-5);
+  margin: 0 0.15rem;
+}
+
+.blog-hero__rss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--blog-accent-a10);
+  color: var(--blog-fg-3);
+  font-size: 0.78rem;
+  text-decoration: none;
+  transition: color var(--blog-dur-fast), border-color var(--blog-dur-fast);
+}
+
+.blog-hero__rss:hover {
+  color: var(--blog-accent);
+  border-color: var(--blog-accent-a32);
+}
+
+/* ── Grid section ─────────────────────────────────────────── */
+.blog-grid-section {
+  padding: 60px 0 90px;
+  background: var(--blog-bg);
+  background-image: radial-gradient(
+      ellipse at 18% 40%,
+      rgba(33, 150, 243, 0.05) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 82% 70%,
+      rgba(33, 150, 243, 0.04) 0%,
+      transparent 45%
+    );
+}
+
+/* ── Bento grid ───────────────────────────────────────────── */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--blog-gap);
+}
+
+/* span helpers */
+.bento--w2 {
+  grid-column: span 2;
+}
+
+.bento--w3 {
+  grid-column: span 3;
+}
+
+/* ── Card base - glassmorphism ────────────────────────────── */
+.blog-card {
+  border: 1px solid var(--blog-accent-a10);
+  border-radius: var(--blog-radius);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--blog-surface-1);
+  transition: all var(--blog-dur-slow) var(--blog-ease);
+}
+
+.blog-card:hover {
+  border-color: var(--blog-accent-a32);
+  box-shadow: 0 8px 36px rgba(0, 0, 0, 0.55), 0 0 22px rgba(66, 165, 245, 0.08);
+  transform: translateY(-4px);
+}
+
+/* ── Cover image ──────────────────────────────────────────── */
+.blog-card__cover {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1200/630;
+  flex-shrink: 0;
+  background: var(--blog-surface-3);
+}
+
+/* covers are authored at 1200x630, so every span keeps that native ratio
+   instead of cropping/zooming into a differently-shaped box */
+.bento--w2 .blog-card__cover {
+  aspect-ratio: 1200/630;
+}
+
+.blog-card__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--blog-dur-slower) ease;
+}
+
+.blog-card:hover .blog-card__cover img {
+  transform: scale(1.06);
+}
+
+/* gradient overlay so tag pill stays readable */
+.blog-card__cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+/* ── Tag pill on cover ────────────────────────────────────── */
+.blog-card__tag {
+  position: absolute;
+  top: 11px;
+  left: 12px;
+  z-index: 1;
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 11px;
+  border-radius: 20px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  backdrop-filter: var(--blog-glass-sm);
+  -webkit-backdrop-filter: var(--blog-glass-sm);
+}
+
+.tag-personal {
+  background: rgba(139, 124, 248, 0.6);
+  color: #f0eeff;
+}
+.tag-k8s {
+  background: rgba(66, 165, 245, 0.6);
+  color: #e3f2fd;
+}
+.tag-security {
+  background: rgba(248, 113, 113, 0.6);
+  color: #ffe5e5;
+}
+.tag-cloud {
+  background: rgba(74, 222, 128, 0.6);
+  color: #e0fff0;
+}
+.tag-nlp {
+  background: rgba(251, 191, 36, 0.6);
+  color: #fff8e1;
+}
+.tag-linux {
+  background: rgba(251, 146, 60, 0.6);
+  color: #fff3e0;
+}
+/* Added with content/tags.json - keep the two in sync. */
+.tag-devops {
+  background: rgba(34, 211, 238, 0.6);
+  color: #e0f7fa;
+}
+.tag-ai {
+  background: rgba(236, 72, 153, 0.6);
+  color: #fce7f3;
+}
+.tag-data {
+  background: rgba(45, 212, 191, 0.6);
+  color: #ccfbf1;
+}
+
+/* ── Card body - glass panel ──────────────────────────────── */
+.blog-card__body {
+  padding: 1.3rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background: var(--blog-surface-2);
+  backdrop-filter: var(--blog-glass);
+  -webkit-backdrop-filter: var(--blog-glass);
+  border-top: 1px solid var(--blog-accent-a07);
+}
+
+.blog-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--blog-fg);
+  margin-bottom: 5px;
+  line-height: 1.45;
+}
+
+.blog-card__title a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.blog-card__title a:hover {
+  color: var(--blog-accent);
+}
+
+.blog-card__date {
+  font-size: 11px;
+  color: var(--blog-fg-4);
+  margin-bottom: 10px;
+  font-family: "Courier New", monospace;
+}
+
+.blog-card__excerpt {
+  font-size: 13.5px;
+  color: var(--blog-fg-3);
+  line-height: 1.65;
+  flex: 1;
+  margin-bottom: 1.1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.blog-card__read {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--blog-accent);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: auto;
+  transition: color 0.2s;
+}
+
+.blog-card__read:hover {
+  color: var(--blog-accent-hi);
+}
+
+/* ── Full-width (bento--w3) horizontal card ───────────────── */
+.bento--w3 .blog-card {
+  flex-direction: row;
+}
+
+.bento--w3 .blog-card__cover {
+  width: 50%;
+  aspect-ratio: 1200 / 630;
+  flex-shrink: 0;
+  /* row's default cross-axis stretch would otherwise force the cover to the
+     body's text height, breaking the aspect-ratio and cropping the image */
+  align-self: center;
+}
+
+.bento--w3 .blog-card__cover::after {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0%, transparent 60%);
+}
+
+.bento--w3 .blog-card__body {
+  flex: 1;
+  border-top: none;
+  border-left: 1px solid var(--blog-accent-a07);
+  padding: 2.2rem 2.4rem 2.4rem;
+  justify-content: center;
+}
+
+.bento--w3 .blog-card__title {
+  font-size: 26px;
+  line-height: 1.3;
+  margin-bottom: 10px;
+}
+
+.bento--w3 .blog-card__date {
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+
+.bento--w3 .blog-card__excerpt {
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-line-clamp: 4;
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+.blog-footer {
+  background: var(--blog-surface-3);
+  border-top: 1px solid var(--blog-rule);
+  text-align: center;
+  padding: 2rem;
+  color: var(--blog-fg-5);
+  font-size: 0.82rem;
+}
+
+.blog-footer a {
+  color: #666;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.blog-footer a:hover {
+  color: #aaa;
+}
+
+/* ── Term cards (hover-to-expand vocabulary accordion) ────── */
+/* Prototype: currently hand-authored per-post as raw HTML in the markdown
+   source (see keras-3-multi-backend-agent-platform-workbench.md). If this
+   holds up, the next step is generating this markup automatically from the
+   ### Term / paragraph pattern already used across several posts. */
+/* Cards are absolutely positioned by termCardsMasonry() in blog.js, which
+   measures real per-card heights so a shorter neighbor can sit flush next
+   to a taller one instead of being stretched to match it - true masonry,
+   not achievable with grid/flexbox alone since both stretch or hard-wrap
+   rows by the tallest sibling. Static/no-JS fallback: normal block flow,
+   one full-width card per line - still fully readable. */
+.term-cards {
+  position: relative;
+  margin: 1.75rem 0;
+}
+
+.term-card {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1rem;
+  border: 1px solid var(--blog-accent-a10);
+  border-radius: var(--blog-radius-sm);
+  background: var(--blog-surface-1);
+  overflow: hidden;
+  transition: border-color var(--blog-dur) var(--blog-ease),
+    box-shadow var(--blog-dur) var(--blog-ease),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* JS adds this once it has taken over layout - switches from static flow
+   (margin-bottom stacking) to absolute positioning (transform-driven). */
+.term-cards.is-masonry .term-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-bottom: 0;
+}
+
+.term-card.is-open,
+.term-card:focus-within {
+  border-color: var(--blog-accent-a32);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(66, 165, 245, 0.06);
+}
+
+/* Blurred glow, contained to the card, cycling through the site's tag
+   accent palette for variety - purely CSS, no image assets. */
+.term-card__glow {
+  position: absolute;
+  inset: -30%;
+  z-index: 0;
+  filter: blur(32px);
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity var(--blog-dur-slow) var(--blog-ease);
+}
+
+.term-card.is-open .term-card__glow {
+  opacity: 0.8;
+}
+
+.term-card:nth-of-type(9n + 1) .term-card__glow {
+  background: radial-gradient(
+    circle at 25% 20%,
+    rgba(139, 124, 248, 0.5),
+    transparent 60%
+  );
+}
+.term-card:nth-of-type(9n + 2) .term-card__glow {
+  background: radial-gradient(
+    circle at 25% 20%,
+    rgba(66, 165, 245, 0.5),
+    transparent 60%
+  );
+}
+.term-card:nth-of-type(9n + 3) .term-card__glow {
+  background: radial-gradient(
+    circle at 25% 20%,
+    rgba(248, 113, 113, 0.5),
+    transparent 60%
+  );
+}
+.term-card:nth-of-type(9n + 4) .term-card__glow {
+  background: radial-gradient(
+    circle at 25% 20%,
+    rgba(74, 222, 128, 0.5),
+    transparent 60%
+  );
+}
+.term-card:nth-of-type(9n + 5) .term-card__glow {
+  background: radial-gradient(
+    circle at 25% 20%,
+    rgba(251, 191, 36, 0.5),
+    transparent 60%
+  );
+}
+.term-card:nth-of-type(9n + 6) .term-card__glow {
+  background: radial-gradient(
+    circle at 25% 20%,
+    rgba(251, 146, 60, 0.5),
+    transparent 60%
+  );
+}
+.term-card:nth-of-type(9n + 7) .term-card__glow {
+  background: radial-gradient(
+    circle at 25% 20%,
+    rgba(34, 211, 238, 0.5),
+    transparent 60%
+  );
+}
+.term-card:nth-of-type(9n + 8) .term-card__glow {
+  background: radial-gradient(
+    circle at 25% 20%,
+    rgba(236, 72, 153, 0.5),
+    transparent 60%
+  );
+}
+.term-card:nth-of-type(9n + 9) .term-card__glow {
+  background: radial-gradient(
+    circle at 25% 20%,
+    rgba(45, 212, 191, 0.5),
+    transparent 60%
+  );
+}
+
+.term-card__head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.25rem;
+  outline: none;
+}
+
+.term-card__icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--blog-surface-3);
+  border: 1px solid var(--blog-accent-a10);
+  color: var(--blog-accent-hi);
+  font-size: 14px;
+  transition: transform var(--blog-dur) var(--blog-ease);
+}
+
+.term-card.is-open .term-card__icon {
+  transform: scale(1.08);
+}
+
+.term-card__name {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--blog-fg);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.term-card__hint {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--blog-fg-4);
+  opacity: 0.8;
+  white-space: nowrap;
+  transition: opacity var(--blog-dur-fast) var(--blog-ease);
+}
+
+.term-card.is-open .term-card__hint {
+  opacity: 0;
+}
+
+.term-card__hint--tap {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .term-card__head {
+    cursor: default;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .term-card__hint--hover {
+    display: none;
+  }
+  .term-card__hint--tap {
+    display: inline;
+  }
+  .term-card__head {
+    cursor: pointer;
+  }
+}
+
+.term-card__body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.term-card__body-inner p {
+  transition: opacity 0.35s ease 0.1s;
+}
+.term-card__body {
+  opacity: 1;
+}
+.term-card:not(.is-open) .term-card__body-inner p {
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+.term-card.is-open .term-card__body {
+  grid-template-rows: 1fr;
+}
+
+.term-card__body-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.term-card__body-inner p {
+  margin: 0;
+  padding: 0 1.25rem 1.1rem;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--blog-fg-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .term-card,
+  .term-card__body,
+  .term-card__body-inner p,
+  .term-card__hint,
+  .term-card__icon {
+    transition: none;
+  }
+}
+
+@media (max-width: 575px) {
+  .term-card__head {
+    flex-wrap: wrap;
+  }
+  .term-card__hint {
+    margin-left: calc(34px + 0.75rem);
+  }
+}
+
+/* ── Back to top ──────────────────────────────────────────── */
+.back-to-top {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 40;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--blog-accent-a10);
+  background: var(--blog-surface-1);
+  backdrop-filter: var(--blog-glass-sm);
+  -webkit-backdrop-filter: var(--blog-glass-sm);
+  color: var(--blog-fg-2);
+  font-size: 0.95rem;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity var(--blog-dur), transform var(--blog-dur),
+    border-color var(--blog-dur-fast), color var(--blog-dur-fast);
+}
+
+.back-to-top.is-visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.back-to-top:hover {
+  color: var(--blog-accent);
+  border-color: var(--blog-accent-a32);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back-to-top {
+    transition: opacity var(--blog-dur-fast);
+  }
+}
+
+@media (max-width: 767px) {
+  .back-to-top {
+    right: 1rem;
+    bottom: 1rem;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 991px) {
+  .bento-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .bento--w2 {
+    grid-column: span 2;
+  }
+  .bento--w3 {
+    grid-column: span 2;
+  }
+  .bento--w3 .blog-card {
+    flex-direction: column;
+  }
+
+  .bento--w3 .blog-card__cover {
+    width: 100%;
+    aspect-ratio: 1200/630;
+    min-height: unset;
+  }
+
+  .bento--w3 .blog-card__body {
+    border-left: none;
+    border-top: 1px solid var(--blog-accent-a07);
+    padding: 1.3rem 1.5rem 1.5rem;
+    justify-content: flex-start;
+  }
+
+  .bento--w3 .blog-card__title {
+    font-size: 15px;
+    margin-bottom: 5px;
+  }
+  .bento--w3 .blog-card__date {
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+  .bento--w3 .blog-card__excerpt {
+    font-size: 13.5px;
+    line-height: 1.65;
+    -webkit-line-clamp: 4;
+  }
+
+  .bento--w2 .blog-card__cover {
+    aspect-ratio: 1200/630;
+  }
+}
+
+@media (max-width: 575px) {
+  .bento-grid {
+    grid-template-columns: 1fr;
+  }
+  .bento--w2,
+  .bento--w3 {
+    grid-column: span 1;
+  }
+  .bento--w2 .blog-card__cover {
+    aspect-ratio: 1200/630;
+  }
+}
+
+/* js/custom.js fades .navbar.fixed-top out below 500px of scroll.
+   Every blog page needs this override or the navbar disappears. */
+.navbar.fixed-top {
+  background: rgba(15, 15, 20, 0.97) !important;
+  display: flex !important;
+  opacity: 1 !important;
+}
+
+/* ── Bootstrap 3 interop ──────────────────────────────────────
+   .container carries a :before/:after clearfix (display:table). Inside a grid
+   those pseudo-elements become GRID ITEMS and occupy real cells, pushing the
+   article into the rail's column. Neutralise them wherever .container is also
+   a grid. Grids do not need clearfixing.
+   ------------------------------------------------------------ */
+.post-layout::before,
+.post-layout::after,
+.post-nav__inner::before,
+.post-nav__inner::after,
+.bento-grid::before,
+.bento-grid::after {
+  content: none;
+}
+
+/* Bootstrap 3 styles bare <pre> as a light code box (#f5f5f5 on #ccc).
+   Shiki emits its own <pre class="shiki">, so reset the inherited chrome. */
+.post-prose pre {
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  word-break: normal;
+  word-wrap: normal;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+/* ── Overrides for site-wide element selectors ────────────────
+   aditya.css styles bare elements, which beats colour inherited from
+   .post-prose. Specifically:
+     :159  ol, ul { list-style: none }       -> article lists lose their bullets
+     :222  p { color:#6e7373; font-weight:300 } -> 3.3:1 on #191919, below WCAG AA
+     :151  body { font: 'Josefin Sans' }     -> a geometric display face, poor
+                                                for long-form reading
+   Long-form prose needs its own text stack. This one costs no extra request:
+   on Apple platforms -apple-system resolves to SF Pro, which is exactly what
+   index.html loads over the network anyway.
+   ------------------------------------------------------------ */
+.post-prose,
+.post-faq,
+.comments,
+.post-meta {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.post-prose p {
+  color: inherit;
+  font-weight: 400;
+  font-family: inherit;
+}
+
+.post-prose ul {
+  list-style: disc outside;
+}
+.post-prose ol {
+  list-style: decimal outside;
+}
+.post-prose ul ul {
+  list-style: circle outside;
+}
+
+.post-prose li {
+  color: inherit;
+}
+
+.post-faq dd,
+.comment__body {
+  font-family: inherit;
+}
+
+/* ==========================================================================
+   POST PAGE
+   Article + sticky right rail. Single column below 992px.
+   ========================================================================== */
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Reading progress ─────────────────────────────────────── */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 1040;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.reading-progress__bar {
+  display: block;
+  height: 100%;
+  width: 0;
+  transform-origin: 0 50%;
+  background: linear-gradient(
+    90deg,
+    var(--blog-accent-deep),
+    var(--blog-accent-hi)
+  );
+  box-shadow: 0 0 10px rgba(66, 165, 245, 0.5);
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+.post-hero {
+  padding: 128px 0 30px;
+  background: var(--blog-bg);
+  background-image: radial-gradient(
+    ellipse at 22% 0%,
+    rgba(33, 150, 243, 0.07) 0%,
+    transparent 55%
+  );
+}
+
+.post-hero__inner {
+  max-width: 860px;
+}
+
+.post-breadcrumb {
+  font-size: 0.78rem;
+  color: var(--blog-fg-4);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 1.1rem;
+}
+
+.post-breadcrumb a {
+  color: var(--blog-fg-3);
+  text-decoration: none;
+  transition: color var(--blog-dur-fast);
+}
+
+.post-breadcrumb a:hover {
+  color: var(--blog-accent);
+}
+.post-breadcrumb span {
+  margin: 0 0.35rem;
+}
+
+.post-hero__title {
+  font-size: clamp(1.85rem, 1.2rem + 2.4vw, 3.1rem);
+  line-height: 1.14;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--blog-fg);
+  margin: 0 0 1.15rem;
+  max-width: 24ch;
+}
+
+.post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.83rem;
+  color: var(--blog-fg-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.post-meta__dot {
+  color: var(--blog-fg-5);
+}
+.post-meta__updated {
+  color: var(--blog-fg-4);
+}
+
+.post-views {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--blog-fg-3);
+  font-family: var(--blog-mono);
+  font-size: 0.8rem;
+}
+
+.post-views i {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+/* Odometer roll-in: the count arrives from JS, so it should land deliberately
+   rather than pop. Applied by js/blog.js once the number is known. */
+.post-views__count {
+  display: inline-block;
+  min-width: 1ch;
+}
+
+.post-views__count.is-landing {
+  animation: view-roll 0.45s var(--blog-ease) both;
+}
+
+@keyframes view-roll {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+.post-comments-hero {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--blog-fg-3);
+  font-family: var(--blog-mono);
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: color var(--blog-dur-fast);
+}
+
+.post-comments-hero:hover {
+  color: var(--blog-accent);
+  text-decoration: none;
+}
+.post-comments-hero i {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+/* ── Cover ────────────────────────────────────────────────── */
+.post-cover {
+  margin: 2rem auto 0;
+  max-width: 1000px;
+  border-radius: var(--blog-radius);
+  overflow: hidden;
+  border: 1px solid var(--blog-accent-a10);
+  background: var(--blog-surface-3);
+  line-height: 0;
+}
+
+.post-cover img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Bootstrap's .container is a fixed WIDTH (not max-width), pinned at exactly
+   1170px from 1200px viewports upward with no further breakpoint - so on any
+   laptop or desktop screen every blog page sat in a fixed narrow column with
+   large dead margins on both sides, no matter how the space inside it was
+   divided. Widening the measure alone couldn't fix that; the box itself
+   needed to grow. Scoped to blog pages only via the body class. */
+@media (min-width: 1200px) {
+  body.blog-page .container {
+    width: 1400px;
+  }
+}
+
+@media (min-width: 1600px) {
+  body.blog-page .container {
+    width: 1680px;
+  }
+}
+
+/* ── Two column layout ────────────────────────────────────── */
+.post-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 3.5rem;
+  /* Stretch (the default) rather than start: the rail's own box needs to be
+     as tall as the row - i.e. as tall as the prose - or its sticky child has
+     no room to stick and just scrolls away after its own short content ends. */
+  padding-top: 3.25rem;
+  padding-bottom: 4rem;
+}
+
+/* ── Prose ────────────────────────────────────────────────── */
+.post-prose {
+  max-width: var(--blog-measure);
+  color: var(--blog-fg-2);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  overflow-wrap: break-word;
+}
+
+.post-prose > :first-child {
+  margin-top: 0;
+}
+.post-prose > :last-child {
+  margin-bottom: 0;
+}
+
+.post-prose p {
+  margin: 0 0 1.4rem;
+}
+
+.post-lede {
+  font-size: 1.2rem;
+  line-height: 1.65;
+  color: #cfcfcf;
+}
+
+.post-prose h2,
+.post-prose h3,
+.post-prose h4 {
+  color: var(--blog-fg);
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  scroll-margin-top: 96px;
+  position: relative;
+}
+
+.post-prose h2 {
+  font-size: 1.75rem;
+  line-height: 1.25;
+  margin: 3rem 0 1rem;
+  padding-top: 0.6rem;
+}
+
+.post-prose h3 {
+  font-size: 1.3rem;
+  line-height: 1.35;
+  margin: 2.2rem 0 0.8rem;
+}
+
+.post-prose h4 {
+  font-size: 1.08rem;
+  margin: 1.8rem 0 0.6rem;
+}
+
+/* Heading anchors: a '#' fades in to the left on hover. */
+.heading-anchor {
+  position: absolute;
+  left: -1.3em;
+  color: var(--blog-accent);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity var(--blog-dur-fast);
+  font-weight: 400;
+}
+
+.post-prose h2:hover .heading-anchor,
+.post-prose h3:hover .heading-anchor,
+.heading-anchor:focus-visible {
+  opacity: 0.75;
+}
+
+/* Bold/italic read as highlighted pills - the same treatment as inline code
+   below, so emphasis in prose and in comments share one visual language. */
+.post-prose strong {
+  font-weight: 650;
+  padding: 0.1em 0.4em;
+  border-radius: 5px;
+  background: rgba(66, 165, 245, 0.1);
+  color: #b9dcff;
+}
+
+.post-prose em {
+  font-style: italic;
+  padding: 0.1em 0.4em;
+  border-radius: 5px;
+  background: rgba(167, 139, 250, 0.14);
+  color: #d9c9ff;
+}
+
+/* Bold+italic combos always land on the violet pill, whichever tag markdown-it
+   happens to nest outside the other - the inner tag just resets to inherit. */
+.post-prose strong:has(em) {
+  background: rgba(167, 139, 250, 0.14);
+  color: #d9c9ff;
+}
+
+.post-prose strong em,
+.post-prose em strong {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font-weight: 650;
+}
+
+/* Animatable underline - cleaner than text-decoration. */
+.post-prose a:not(.heading-anchor) {
+  color: var(--blog-accent);
+  text-decoration: none;
+  background-image: linear-gradient(
+    var(--blog-accent-a32),
+    var(--blog-accent-a32)
+  );
+  background-size: 100% 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size var(--blog-dur-fast), color var(--blog-dur-fast);
+}
+
+.post-prose a:not(.heading-anchor):hover {
+  color: var(--blog-accent-hi);
+  background-size: 100% 2px;
+}
+
+.post-prose ul,
+.post-prose ol {
+  margin: 0 0 1.4rem;
+  padding-left: 1.4rem;
+}
+.post-prose li {
+  margin-bottom: 0.5rem;
+}
+.post-prose li::marker {
+  color: var(--blog-accent);
+}
+.post-prose ul ul,
+.post-prose ol ol {
+  margin: 0.5rem 0 0;
+}
+
+.post-prose blockquote {
+  margin: 1.8rem 0;
+  padding: 0.2rem 0 0.2rem 1.4rem;
+  border-left: 3px solid var(--blog-accent);
+  color: var(--blog-fg-2);
+  font-style: italic;
+}
+
+.post-prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.post-prose hr {
+  border: 0;
+  border-top: 1px solid var(--blog-rule);
+  margin: 2.6rem 0;
+}
+
+.post-prose :not(pre) > code {
+  font-family: var(--blog-mono);
+  font-size: 0.86em;
+  padding: 0.15em 0.4em;
+  border-radius: 5px;
+  background: rgba(66, 165, 245, 0.1);
+  color: #b9dcff;
+  overflow-wrap: break-word;
+}
+
+/* ── Figures ──────────────────────────────────────────────── */
+.post-figure {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.post-figure img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--blog-radius-sm);
+  border: 1px solid var(--blog-accent-a10);
+}
+
+.post-figure figcaption {
+  margin-top: 0.7rem;
+  font-size: 0.83rem;
+  font-style: italic;
+  color: var(--blog-fg-4);
+}
+
+/* ── Tables wrap instead of scrolling ─────────────────────── */
+.table-wrap {
+  overflow-x: hidden;
+  margin: 1.8rem 0;
+  border: 1px solid var(--blog-accent-a10);
+  border-radius: var(--blog-radius-sm);
+}
+
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.table-wrap th,
+.table-wrap td {
+  padding: 0.7rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid var(--blog-rule);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* inline code (option names, identifiers) reads as one unbroken token -
+   auto table layout then gives that column just enough width to fit it,
+   instead of splitting it mid-word like ordinary prose */
+.table-wrap code {
+  white-space: nowrap;
+}
+
+.table-wrap th {
+  color: var(--blog-fg);
+  font-weight: 650;
+  background: rgba(66, 165, 245, 0.06);
+  white-space: normal;
+}
+
+.table-wrap tr:last-child td {
+  border-bottom: 0;
+}
+
+/* ── Code blocks ──────────────────────────────────────────── */
+.code-block {
+  position: relative;
+  margin: 1.8rem 0;
+  border-radius: var(--blog-radius-sm);
+  border: 1px solid var(--blog-accent-a10);
+  background: var(--blog-surface-3);
+  overflow: hidden;
+}
+
+.code-block::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0.5rem;
+  right: 0.7rem;
+  font-family: var(--blog-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--blog-fg-4);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.code-block .shiki {
+  margin: 0;
+  padding: 1.15rem 1.25rem;
+  overflow-x: auto;
+  background: transparent !important;
+  font-size: 0.855rem;
+  line-height: 1.65;
+  -webkit-overflow-scrolling: touch;
+}
+
+.code-block .shiki code {
+  font-family: var(--blog-mono);
+  background: none;
+  padding: 0;
+}
+
+.code-copy {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.55rem;
+  z-index: 2;
+  padding: 0.22rem 0.6rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--blog-fg-3);
+  background: rgba(25, 25, 25, 0.9);
+  border: 1px solid var(--blog-accent-a10);
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--blog-dur-fast), color var(--blog-dur-fast),
+    border-color var(--blog-dur-fast);
+}
+
+.code-block:hover .code-copy,
+.code-copy:focus-visible {
+  opacity: 1;
+}
+
+.code-copy:hover {
+  color: var(--blog-accent);
+  border-color: var(--blog-accent-a32);
+}
+
+/* Language label hides while the button is visible so they never collide. */
+.code-block:hover::before {
+  opacity: 0;
+}
+
+.code-copy__done {
+  display: none;
+}
+.code-copy.is-done {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.4);
+  opacity: 1;
+}
+.code-copy.is-done .code-copy__idle {
+  display: none;
+}
+.code-copy.is-done .code-copy__done {
+  display: inline;
+}
+
+/* ── Footnotes ────────────────────────────────────────────── */
+.footnotes {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--blog-rule);
+  font-size: 0.9rem;
+  color: var(--blog-fg-3);
+}
+
+.footnotes hr {
+  display: none;
+}
+.footnote-backref {
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   STICKY RAIL
+   ========================================================================== */
+
+.post-rail {
+  position: relative;
+}
+
+.post-rail__sticky {
+  position: sticky;
+  top: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.rail-block__title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--blog-fg-4);
+  margin: 0 0 0.75rem;
+}
+
+/* ── Table of contents ────────────────────────────────────── */
+.post-toc__summary {
+  display: none;
+}
+
+.post-toc__list,
+.post-toc__sub {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.post-toc__list > li {
+  position: relative;
+}
+
+.post-toc__sub {
+  margin: 0.15rem 0 0.15rem 0.85rem;
+}
+
+.post-toc a {
+  display: block;
+  padding: 0.32rem 0 0.32rem 0.85rem;
+  border-left: 2px solid var(--blog-rule);
+  font-size: 0.845rem;
+  line-height: 1.45;
+  color: var(--blog-fg-3);
+  text-decoration: none;
+  transition: color var(--blog-dur-fast), border-color var(--blog-dur-fast);
+}
+
+.post-toc a:hover {
+  color: var(--blog-fg-2);
+  border-left-color: rgba(66, 165, 245, 0.45);
+}
+
+.post-toc__sub a {
+  font-size: 0.8rem;
+  color: var(--blog-fg-4);
+}
+
+/* Set by the IntersectionObserver scrollspy in js/blog.js. */
+.post-toc a.is-active {
+  color: var(--blog-accent);
+  border-left-color: var(--blog-accent);
+  font-weight: 550;
+}
+
+/* ── Tag pills in the rail ────────────────────────────────── */
+.post-tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tag-pill {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: transform var(--blog-dur-fast), filter var(--blog-dur-fast);
+}
+
+.tag-pill:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.18);
+  text-decoration: none;
+}
+
+/* ── Share ────────────────────────────────────────────────── */
+.post-share {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 1px solid var(--blog-accent-a10);
+  background: var(--blog-surface-1);
+  color: var(--blog-fg-3);
+  font-size: 0.82rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--blog-dur-fast), border-color var(--blog-dur-fast),
+    transform var(--blog-dur-fast);
+}
+
+.share-btn:hover {
+  color: var(--blog-accent);
+  border-color: var(--blog-accent-a32);
+  transform: translateY(-2px);
+}
+
+.share-btn__done {
+  display: none;
+}
+.share-btn--copy.is-done {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.4);
+}
+.share-btn--copy.is-done .share-btn__idle {
+  display: none;
+}
+.share-btn--copy.is-done .share-btn__done {
+  display: inline;
+}
+
+.rail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--blog-fg-3);
+  text-decoration: none;
+  transition: color var(--blog-dur-fast), gap var(--blog-dur-fast);
+}
+
+.rail-back:hover {
+  color: var(--blog-accent);
+  gap: 0.7rem;
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   FAQ  (visible - the same data that generates FAQPage JSON-LD)
+   ========================================================================== */
+
+.post-faq {
+  background: var(--blog-surface-3);
+  border-top: 1px solid var(--blog-rule);
+  border-bottom: 1px solid var(--blog-rule);
+  padding: 3.25rem 0;
+}
+
+.post-faq__inner {
+  max-width: 980px;
+}
+
+.post-faq__title {
+  font-size: 1.45rem;
+  font-weight: 650;
+  color: var(--blog-fg);
+  margin: 0 0 1.75rem;
+  letter-spacing: -0.015em;
+}
+
+.faq-list {
+  margin: 0;
+}
+
+.faq-item {
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--blog-rule);
+}
+
+.faq-item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.faq-item dt {
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--blog-fg);
+  margin-bottom: 0.5rem;
+}
+
+.faq-item dd {
+  margin: 0;
+  font-size: 0.945rem;
+  line-height: 1.7;
+  color: var(--blog-fg-2);
+}
+
+/* ==========================================================================
+   PREV / NEXT
+   ========================================================================== */
+
+.post-nav {
+  background: var(--blog-bg);
+  padding: 3rem 0;
+}
+
+.post-nav__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--blog-gap);
+}
+
+.post-nav__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--blog-accent-a10);
+  border-radius: var(--blog-radius);
+  background: var(--blog-surface-1);
+  text-decoration: none;
+  transition: border-color var(--blog-dur),
+    transform var(--blog-dur) var(--blog-ease);
+}
+
+.post-nav__card:hover {
+  border-color: var(--blog-accent-a32);
+  transform: translateY(-3px);
+  text-decoration: none;
+}
+
+.post-nav__card--next {
+  text-align: right;
+}
+
+.post-nav__label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blog-fg-4);
+}
+
+.post-nav__title {
+  font-size: 0.96rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--blog-fg);
+}
+
+.post-nav__card:hover .post-nav__title {
+  color: var(--blog-accent);
+}
+.post-nav__spacer {
+  display: block;
+}
+
+/* ==========================================================================
+   COMMENTS
+   ========================================================================== */
+
+.comments {
+  background: var(--blog-surface-3);
+  border-top: 1px solid var(--blog-rule);
+  /* Extra breathing room (~2 lines) below the share/prev-next area before
+     the wider comments column begins. */
+  padding: 7rem 0 4.5rem;
+}
+
+.comments__inner {
+  max-width: 980px;
+}
+
+.comments__title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.35rem;
+  font-weight: 650;
+  color: var(--blog-fg);
+  margin: 0 0 1.75rem;
+  letter-spacing: -0.015em;
+}
+
+.comments__title i {
+  color: var(--blog-accent);
+  font-size: 0.95em;
+}
+
+.comments__count {
+  font-family: var(--blog-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--blog-fg-4);
+}
+
+.comments__notice,
+.comments__error,
+.comments__empty {
+  font-size: 0.92rem;
+  color: var(--blog-fg-3);
+  padding: 1.6rem;
+  text-align: center;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: var(--blog-radius-sm);
+  margin: 0 0 1.5rem;
+}
+
+.comments__empty strong {
+  display: block;
+  color: var(--blog-fg-2);
+  margin-bottom: 0.25rem;
+}
+
+.comments__list {
+  list-style: none;
+  margin: 0 0 2rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.comment {
+  padding: 1.1rem 1.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: var(--blog-radius-sm);
+  background: rgba(255, 255, 255, 0.018);
+  animation: comment-in var(--blog-dur) var(--blog-ease) both;
+}
+
+@keyframes comment-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.comment__head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.5rem;
+}
+
+.comment__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.comment__author {
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: var(--blog-fg);
+}
+
+.comment__time {
+  font-size: 0.75rem;
+  color: var(--blog-fg-4);
+  font-variant-numeric: tabular-nums;
+}
+
+.comment__badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--blog-accent-deep);
+  color: #fff;
+}
+
+.comment__body {
+  font-size: 0.94rem;
+  line-height: 1.7;
+  color: var(--blog-fg-2);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  margin: 0;
+}
+
+.comment__code-inline {
+  font-family: var(--blog-mono);
+  font-size: 0.88em;
+  color: var(--blog-accent-hi);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.1em 0.4em;
+  border-radius: 5px;
+  overflow-wrap: break-word;
+}
+
+.comment__code-block {
+  display: block;
+  margin: 0.6rem 0;
+  padding: 0.85rem 1rem;
+  background: var(--blog-surface-3);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--blog-radius-sm);
+  overflow-x: auto;
+}
+
+.comment__code-block code {
+  font-family: var(--blog-mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--blog-fg-2);
+  white-space: pre;
+}
+
+.comment__actions {
+  display: flex;
+  gap: 0.9rem;
+  margin-top: 0.6rem;
+}
+
+.comment__action {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blog-fg-4);
+  cursor: pointer;
+  transition: color var(--blog-dur-fast);
+}
+
+.comment__action:hover {
+  color: var(--blog-accent);
+}
+.comment__action--danger:hover {
+  color: #f87171;
+}
+
+/* Author replies are unmistakable. */
+.comment--author {
+  border-left: 2px solid var(--blog-accent);
+  background: rgba(33, 150, 243, 0.05);
+}
+
+/* One level of nesting, with a connector line. */
+.comment__replies {
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0 0 0 1.5rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.comment__replies::before {
+  content: "";
+  position: absolute;
+  left: 0.35rem;
+  top: 0.2rem;
+  bottom: 0.6rem;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* Optimistic insert: visible immediately, settles when the server confirms. */
+.comment.is-pending {
+  opacity: 0.55;
+}
+
+.comment.is-pending::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.comment.is-failed {
+  border-color: rgba(248, 113, 113, 0.4);
+  background: rgba(248, 113, 113, 0.05);
+}
+
+/* Skeletons reserve the space so nothing jumps when comments land. */
+.comment-skeleton {
+  padding: 1.1rem 1.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--blog-radius-sm);
+}
+
+.comment-skeleton__line {
+  height: 9px;
+  border-radius: 5px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.045) 25%,
+    rgba(255, 255, 255, 0.09) 37%,
+    rgba(255, 255, 255, 0.045) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton 1.4s ease-in-out infinite;
+  margin-bottom: 0.6rem;
+}
+
+.comment-skeleton__line:nth-child(1) {
+  width: 28%;
+}
+.comment-skeleton__line:nth-child(2) {
+  width: 100%;
+}
+.comment-skeleton__line:nth-child(3) {
+  width: 76%;
+  margin-bottom: 0;
+}
+
+@keyframes skeleton {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* ── Compose form ─────────────────────────────────────────── */
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.4rem;
+  border: 1px solid var(--blog-accent-a10);
+  border-radius: var(--blog-radius);
+  background: var(--blog-surface-1);
+}
+
+.comment-form__row {
+  position: relative;
+}
+
+.comment-form__name,
+.comment-form__body {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.92rem;
+  font-family: inherit;
+  line-height: 1.6;
+  color: var(--blog-fg);
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--blog-radius-sm);
+  transition: border-color var(--blog-dur-fast), box-shadow var(--blog-dur-fast);
+}
+
+.comment-form__body {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.comment-form__name::placeholder,
+.comment-form__body::placeholder {
+  color: var(--blog-fg-4);
+}
+
+.comment-form__name:focus,
+.comment-form__body:focus {
+  outline: none;
+  border-color: var(--blog-accent-a32);
+  box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.1);
+}
+
+.comment-form__counter {
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.55rem;
+  font-family: var(--blog-mono);
+  font-size: 0.7rem;
+  color: var(--blog-fg-4);
+  pointer-events: none;
+}
+
+.comment-form__counter.is-near {
+  color: #fbbf24;
+}
+.comment-form__counter.is-over {
+  color: #f87171;
+}
+
+.comment-form__hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.76rem;
+  color: var(--blog-fg-4);
+}
+
+.comment-form__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.comment-form__status {
+  margin: 0;
+  font-size: 0.83rem;
+  color: var(--blog-fg-3);
+  min-height: 1.2em;
+}
+
+.comment-form__status.is-error {
+  color: #f87171;
+}
+.comment-form__status.is-ok {
+  color: #4ade80;
+}
+
+.comment-form__submit {
+  padding: 0.6rem 1.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--blog-accent-deep);
+  border: 0;
+  border-radius: var(--blog-radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--blog-dur-fast), transform var(--blog-dur-fast),
+    opacity var(--blog-dur-fast);
+}
+
+.comment-form__submit:hover:not(:disabled) {
+  background: var(--blog-accent);
+  transform: translateY(-1px);
+}
+.comment-form__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.comment-form__turnstile:empty {
+  display: none;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 991px) {
+  .post-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+    padding-top: 2.25rem;
+  }
+
+  /* Rail moves above the article; the TOC becomes a collapsed <details>. */
+  .post-rail {
+    order: -1;
+  }
+
+  .post-rail__sticky {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1.25rem 2rem;
+  }
+
+  .post-toc {
+    flex: 1 1 100%;
+  }
+  .post-toc .rail-block__title {
+    display: none;
+  }
+
+  .post-toc__summary {
+    display: block;
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--blog-fg-3);
+    padding: 0.7rem 0;
+    border-top: 1px solid var(--blog-rule);
+    border-bottom: 1px solid var(--blog-rule);
+  }
+
+  .post-toc__details {
+    border-radius: var(--blog-radius-sm);
+  }
+  .post-toc__details[open] .post-toc__summary {
+    border-bottom-color: transparent;
+  }
+  .post-toc__list {
+    padding: 0.6rem 0;
+  }
+
+  .rail-back {
+    display: none;
+  }
+  .post-hero {
+    padding-top: 108px;
+  }
+  .post-cover {
+    margin-top: 1.5rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .post-prose {
+    font-size: 1rem;
+  }
+  .post-lede {
+    font-size: 1.08rem;
+  }
+  .post-prose h2 {
+    font-size: 1.45rem;
+    margin-top: 2.4rem;
+  }
+  .post-prose h3 {
+    font-size: 1.16rem;
+  }
+  .heading-anchor {
+    display: none;
+  }
+
+  .post-nav__inner {
+    grid-template-columns: 1fr;
+  }
+  .post-nav__card--next {
+    text-align: left;
+  }
+
+  .comment-form__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .comment-form__submit {
+    width: 100%;
+  }
+
+  .code-copy {
+    opacity: 1;
+  }
+  .code-block:hover::before {
+    opacity: 1;
+  }
+}
+
+/* On touch devices there is no hover, so the copy button must always show. */
+@media (hover: none) {
+  .code-copy {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   Collapse every transform and animation to opacity only.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .blog-card:hover,
+  .post-nav__card:hover,
+  .share-btn:hover,
+  .tag-pill:hover {
+    transform: none;
+  }
+
+  .blog-card:hover .blog-card__cover img {
+    transform: none;
+  }
+  .comment-skeleton__line {
+    animation: none;
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* ==========================================================================
+   LISTING TOOLBAR - search + tag filter chips
+   ========================================================================== */
+
+.blog-toolbar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.blog-search {
+  position: relative;
+  flex: 1 1 180px;
+  max-width: 300px;
+  min-width: 0;
+}
+
+/* The FontAwesome kit swaps <i> for <svg> at runtime, so `.blog-search i`
+   alone stops matching once the kit loads and the icon falls into flow. */
+.blog-search i,
+.blog-search svg {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.78rem;
+  color: var(--blog-fg-4);
+  pointer-events: none;
+  transition: opacity var(--blog-dur-fast);
+}
+
+/* While the search index is still being fetched (warmed in the background,
+   or on a slow connection): swap the static magnifying glass for a small
+   spinner so a genuinely slow fetch reads as "working", not "frozen". */
+.blog-search.is-loading i,
+.blog-search.is-loading svg {
+  opacity: 0;
+}
+
+.blog-search__spinner {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--blog-accent-a32);
+  border-top-color: var(--blog-accent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--blog-dur-fast);
+}
+
+.blog-search.is-loading .blog-search__spinner {
+  opacity: 1;
+  animation: blog-search-spin 0.7s linear infinite;
+}
+
+@keyframes blog-search-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blog-search.is-loading .blog-search__spinner {
+    animation: none;
+  }
+}
+
+.blog-search input {
+  width: 100%;
+  padding: 0.55rem 0.9rem 0.55rem 2.2rem;
+  font-size: 0.87rem;
+  font-family: inherit;
+  color: var(--blog-fg);
+  background: var(--blog-surface-1);
+  border: 1px solid var(--blog-accent-a10);
+  border-radius: 999px;
+  transition: border-color var(--blog-dur-fast), box-shadow var(--blog-dur-fast);
+}
+
+.blog-search input::placeholder {
+  color: var(--blog-fg-4);
+}
+
+.blog-search input:focus {
+  outline: none;
+  border-color: var(--blog-accent-a32);
+  box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.1);
+}
+
+.blog-search input::-webkit-search-cancel-button {
+  filter: invert(0.6);
+}
+
+.blog-filter {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  margin-left: auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* The fade only appears when js/blog.js measures actual overflow - a row
+   that already fits gets no fade, so the common case reads as a clean,
+   deliberate single line rather than a permanently "cut off" edge. */
+.blog-filter.is-scrollable {
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    #000 calc(100% - 28px),
+    transparent
+  );
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+}
+
+.blog-filter::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--blog-fg-3);
+  background: var(--blog-surface-1);
+  border: 1px solid var(--blog-accent-a10);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color var(--blog-dur-fast), border-color var(--blog-dur-fast),
+    background var(--blog-dur-fast);
+}
+
+.filter-chip:hover {
+  color: var(--blog-fg);
+  border-color: var(--blog-accent-a32);
+}
+
+.filter-chip.is-active {
+  color: #fff;
+  background: var(--blog-accent-deep);
+  border-color: var(--blog-accent-deep);
+}
+
+.filter-chip__n {
+  font-size: 0.68em;
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+}
+
+.blog-empty {
+  text-align: center;
+  color: var(--blog-fg-3);
+  font-size: 0.95rem;
+  padding: 3rem 1rem;
+}
+
+/* Cards hidden by the tag filter / search. The FLIP animation in js/blog.js
+   handles the reposition; this just removes them from flow. */
+[data-card].is-hidden {
+  display: none;
+}
+
+/* The whole card is a click target (js/blog.js); real <a> children inside
+   it keep their own affordance and still work as normal links. */
+[data-card] {
+  cursor: pointer;
+}
+[data-card] a {
+  cursor: pointer;
+}
+
+/* ── Card additions ───────────────────────────────────────── */
+
+/* Tag pill is now a link on native cards; keep it looking identical. */
+a.blog-card__tag {
+  text-decoration: none;
+}
+a.blog-card__tag:hover {
+  filter: brightness(1.2);
+  text-decoration: none;
+}
+
+/* Legacy Hashnode cards are honest about living off-site. */
+.blog-card__ext {
+  position: absolute;
+  top: 11px;
+  right: 12px;
+  z-index: 1;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+  color: var(--blog-fg-2);
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: var(--blog-glass-sm);
+  -webkit-backdrop-filter: var(--blog-glass-sm);
+}
+
+.blog-card--external {
+  border-style: dashed;
+}
+
+.blog-card__views {
+  font-family: var(--blog-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.blog-card__date time {
+  color: inherit;
+}
+
+@media (max-width: 767px) {
+  .blog-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .blog-search {
+    flex: 1 1 auto;
+  }
+  .blog-filter {
+    margin-left: 0;
+  }
+}

@@ -369,7 +369,7 @@
         var active = new Map();
         var mouseX = -9999, mouseY = -9999;
         // All content sections (skip hero which is .section-home)
-        var sections = document.querySelectorAll('.section:not(.section-home)');
+        var sections = document.querySelectorAll('.section:not(.section-home):not(.section-blog):not(.section-freelance)');;
         var heroEl = document.querySelector('.section-home');
  
         function resize() {
@@ -383,13 +383,13 @@
             // Elements with backdrop-filter blur (like .social-card) let the
             // grid's colored tile bleed through underneath them, so treat
             // hovering over one as if the mouse were off-canvas entirely.
-            if (e.target.closest && e.target.closest('.social-card')) {
+            if (e.target.closest && e.target.closest('.social-card, .section-blog, .section-services .row, .section-certifications .row, .section-resume .row, .section-freelance')) {
                 mouseX = -9999; mouseY = -9999;
             } else {
                 mouseX = e.clientX; mouseY = e.clientY;
             }
         });
- 
+
         function proj(gx, gy, cx, cy, gw, gh) {
             var x = (gx - gw/2)*2, y = (gy - gh/2)*2;
             var x2 = R00*x + R01*y, y2 = R10*x + R11*y, z2 = R20*x + R21*y;
@@ -434,7 +434,7 @@
                 if (rect.bottom < 0 || rect.top > h) return;
  
                 // Scale grid to cover section height
-                var cols = BASE_COLS;
+                var cols = BASE_COLS * 3;
                 var rows = Math.max(BASE_ROWS, Math.ceil(rect.height / TILE) + 20);
                 var gw = cols * TILE, gh = rows * TILE;
                 var dark = isDark(sec);
@@ -492,6 +492,18 @@
                         var key = si+'-'+cell.col+'-'+cell.row;
                         active.set(key, { si:si, col:cell.col, row:cell.row, c:getColor(cell.col,cell.row), t:now, gw:gw, gh:gh });
                     }
+                }
+
+                // No grid or color tiles over the Find Me Online cards area
+                                var cardEls = sec.querySelectorAll('.social-card');
+                if (cardEls.length) {
+                    var hl = 1e9, ht = 1e9, hr2 = -1e9, hb = -1e9;
+                    cardEls.forEach(function(el) {
+                        var q = el.getBoundingClientRect();
+                        hl = Math.min(hl, q.left); ht = Math.min(ht, q.top);
+                        hr2 = Math.max(hr2, q.right); hb = Math.max(hb, q.bottom);
+                    });
+                    ctx.clearRect(hl - 10, ht - 10, hr2 - hl + 20, hb - ht + 20);
                 }
                 ctx.restore();
             });

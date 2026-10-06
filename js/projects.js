@@ -2,8 +2,8 @@ window.PORTFOLIO_PROJECTS = [
   {
   category: "Gen AI",
   image: "images/vlm.png",
-  title: "Optimizing Image Data for Large Vision-Language Models (VLMs)",
-  desc: "Role: Multi-Model AI Engineer at Ask Sage. Focused on optimizing image data for large vision-language models: preparing and refining image inputs (resizing, cropping, format and quality handling) so models receive cleaner, lighter images with lower token cost and latency.",
+  title: "Optimizing Image Data for Large Vision Language Models (VLMs)",
+  desc: "Role: Multimodel AI Engineer at Ask Sage.ai (a BigBear.ai company). Optimizing image data for large vision language models: preparing and refining image inputs (resizing, cropping, format and quality handling) so models receive cleaner, lighter images with lower token cost and latency.",
   tech: "PyTorch, OpenCV, Pillow",
   links: [
     { label: "Link", url: "https://www.asksage.ai/" }
@@ -50,7 +50,24 @@ window.PORTFOLIO_PROJECTS = [
     function safeUrl(u) {
       return /^(https?:\/\/|\/|[a-z0-9_.-]+\/)/i.test(u || "") ? u : "";
     }
-
+        function hug(t) {
+      t.style.width = "";
+      var r = document.createRange();
+      r.selectNodeContents(t);
+      var rects = r.getClientRects(), max = 0, i;
+      for (i = 0; i < rects.length; i++) if (rects[i].width > max) max = rects[i].width;
+      var scale = t.getBoundingClientRect().width / (t.offsetWidth || 1) || 1;
+      var cs = getComputedStyle(t);
+      var extra = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) +
+                  parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth);
+      var w = Math.ceil(max / scale + extra) + 2;
+      if (w < t.offsetWidth) t.style.width = w + "px";
+    }
+    function hugAll() {
+      Array.prototype.forEach.call(grid.querySelectorAll(".proj-title-text"), hug);
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(hugAll);
+    window.addEventListener("resize", hugAll);
     function card(p) {
       var c = mk("article", "proj-card");
       var media = mk("div", "proj-media");
@@ -64,7 +81,9 @@ window.PORTFOLIO_PROJECTS = [
       media.appendChild(mk("span", "proj-cat", p.category));
       c.appendChild(media);
       var body = mk("div", "proj-body");
-      body.appendChild(mk("h3", "proj-title", p.title));
+      var h = mk("h3", "proj-title");
+      h.appendChild(mk("span", "proj-title-text", p.title));
+      body.appendChild(h);
       if (p.desc) body.appendChild(mk("p", "proj-desc", p.desc));
       if (p.tech) body.appendChild(mk("p", "proj-tech", p.tech));
       var row = mk("div", "proj-links");
@@ -96,6 +115,7 @@ window.PORTFOLIO_PROJECTS = [
       shown.slice(0, count).forEach(function (p) { grid.appendChild(card(p)); });
       empty.hidden = shown.length > 0;
       updateButton(shown.length);
+      hugAll();
     }
 
     function reveal() {
@@ -109,6 +129,7 @@ window.PORTFOLIO_PROJECTS = [
         grid.appendChild(c);
       });
       updateButton(shown.length);
+      hugAll();
     }
 
     more.addEventListener("click", function () {

@@ -1505,7 +1505,7 @@ html, body {
     75%  { background-position: 0% 100%; }
     100% { background-position: 0% 50%; }
 }
- 
+
 .section-contact .btn:hover,
 .section-testimony .btn:hover,
 .section-freelance .btn:hover {
@@ -1519,3 +1519,5 @@ html, body {
   position: relative;
   z-index: 3;
 }
+
+.section-projects { position: relative; z-index: 2; }
